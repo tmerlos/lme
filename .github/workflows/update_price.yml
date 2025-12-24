@@ -1,0 +1,33 @@
+name: Actualizar Precios LME
+on:
+  schedule:
+    - cron: '0 * * * *' # Se ejecuta cada hora
+  workflow_dispatch:      # Permite ejecutarlo manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v2
+      
+      - name: Configurar Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Instalar librerías
+        run: pip install requests
+
+      - name: Ejecutar script
+        env:
+          MY_API_KEY: ${{ secrets.MY_API_KEY }} # Configura esto en Settings > Secrets
+        run: python tu_script.py
+
+      - name: Subir cambios a la web
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add index.html
+          git commit -m "Actualización automática de precios" || exit 0
+          git push
