@@ -1,31 +1,33 @@
-name: Actualizar Precios Metales
+name: Actualizar Precios
 on:
   schedule:
-    - cron: '0 * * * *'  # Se ejecuta cada hora
-  workflow_dispatch:      # Permite ejecutarlo manualmente para probar
+    - cron: '0 * * * *'
+  workflow_dispatch:
 
 jobs:
-  build:
+  ejecutar:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
       
-      - name: Configurar Python
-        uses: actions/setup-python@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
-      - name: Instalar librerías
-        run: pip install yfinance pandas
+      - name: Instalar Dependencias
+        run: pip install -r requirements.txt
 
-      - name: Ejecutar el script de Python
-        run: python cotizac.py  # <--- IMPORTANTE: Aquí pusimos el nombre de tu archivo
+      - name: Correr Script
+        run: python cotizac.py
 
-      - name: Guardar cambios en el index.html
+      - name: Subir Cambios
         run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git commit -m "Actualización automática de precios" || exit 0
+          git commit -m "Precio actualizado" || exit 0
           git push
