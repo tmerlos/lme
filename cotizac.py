@@ -63,3 +63,7 @@ def obtener_datos_mercado():
         aluminio = yf.Ticker("ALI=F")
 
         # Precio actual (último cierre)
+# ... (al final de tu script)
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html_template)
+    print("Proceso finalizado con éxito.")
