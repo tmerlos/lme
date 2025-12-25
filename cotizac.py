@@ -67,3 +67,13 @@ def obtener_datos_mercado():
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_template)
     print("Proceso finalizado con éxito.")
+# ... (esto va al final de tu función donde generas el HTML)
+    try:
+        with open("index.html", "w", encoding="utf-8") as f:
+            f.write(html_template)
+        print("ÉXITO: Archivo index.html escrito correctamente.")
+    except Exception as e:
+        print(f"ERROR al escribir el archivo: {e}")
+
+if __name__ == "__main__":
+    obtener_datos_mercado()
