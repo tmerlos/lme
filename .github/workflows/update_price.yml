@@ -1,33 +1,40 @@
 name: Actualizar Precios
 on:
   schedule:
-    - cron: '0 * * * *'
-  workflow_dispatch:
+    - cron: '0 * * * *' # Se ejecuta cada hora
+  workflow_dispatch:      # Botón manual
 
 jobs:
-  ejecutar:
+  build:
     runs-on: ubuntu-latest
+    
+    # ESTO ES LO NUEVO: Fuerza los permisos de escritura desde el código
     permissions:
       contents: write
+      
     steps:
-      - name: Checkout
+      - name: Checkout del código
         uses: actions/checkout@v4
       
-      - name: Setup Python
+      - name: Instalar Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Instalar Dependencias
-        run: pip install -r requirements.txt
+      - name: Instalar librerías
+        run: pip install yfinance pandas
 
-      - name: Correr Script
+      - name: Ejecutar script
         run: python cotizac.py
 
-      - name: Subir Cambios
+      - name: Diagnóstico (Ver si se creó el archivo)
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          ls -l  # Esto mostrará en la consola si index.html existe
+
+      - name: Guardar y Publicar
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
           git add index.html
-          git commit -m "Precio actualizado" || exit 0
+          git commit -m "Actualizar precios" || echo "Sin cambios para subir"
           git push
