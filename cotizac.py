@@ -2,7 +2,7 @@ import yfinance as yf
 from datetime import datetime
 
 def generar_html(precio_cobre, precio_aluminio):
-    """Esta función crea el archivo que verás en internet"""
+    """Genera el archivo HTML con los precios"""
     fecha_actual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
     
     html_template = f"""
@@ -13,7 +13,7 @@ def generar_html(precio_cobre, precio_aluminio):
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Precios LME en Vivo</title>
         <style>
-            body {{ font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }}
+            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }}
             .container {{ background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 8px solid #2c3e50; }}
             h1 {{ color: #2c3e50; margin-bottom: 0.5rem; }}
             .date {{ color: #7f8c8d; margin-bottom: 2rem; font-size: 0.9rem; }}
@@ -50,30 +50,43 @@ def generar_html(precio_cobre, precio_aluminio):
     </html>
     """
     
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html_template)
-    print("¡Archivo index.html generado con éxito!")
-
-def obtener_datos_mercado():
-    print("Obteniendo datos de mercado...")
-    try:
-        # HG=F es el futuro del cobre (Comex/LME proxy)
-        # ALI=F es el futuro del aluminio
-        cobre = yf.Ticker("HG=F")
-        aluminio = yf.Ticker("ALI=F")
-
-        # Precio actual (último cierre)
-# ... (al final de tu script)
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html_template)
-    print("Proceso finalizado con éxito.")
-# ... (esto va al final de tu función donde generas el HTML)
+    # AQUÍ ESTABA EL ERROR: Ahora usamos un bloque simple y seguro
     try:
         with open("index.html", "w", encoding="utf-8") as f:
             f.write(html_template)
         print("ÉXITO: Archivo index.html escrito correctamente.")
     except Exception as e:
-        print(f"ERROR al escribir el archivo: {e}")
+        print(f"ERROR CRÍTICO al guardar el archivo: {e}")
+
+def obtener_datos_mercado():
+    print("Iniciando obtención de datos...")
+    try:
+        # HG=F es Futuros Cobre, ALI=F es Futuros Aluminio
+        cobre = yf.Ticker("HG=F")
+        aluminio = yf.Ticker("ALI=F")
+
+        # Usamos history(period="1d") que es más robusto que .info
+        hist_cobre = cobre.history(period="1d")
+        hist_aluminio = aluminio.history(period="1d")
+
+        if hist_cobre.empty or hist_aluminio.empty:
+            print("Error: Yahoo Finance no devolvió datos (Mercado cerrado o error de conexión)")
+            return
+
+        val_cobre = hist_cobre['Close'].iloc[-1]
+        val_aluminio = hist_aluminio['Close'].iloc[-1]
+
+        # Conversión: Cobre de libras a toneladas
+        precio_cobre_ton = val_cobre * 2204.62
+        precio_aluminio_ton = val_aluminio
+
+        print(f"Datos obtenidos -> Cobre: {precio_cobre_ton:.2f}, Aluminio: {precio_aluminio_ton:.2f}")
+        
+        # Llamamos a la función que crea el HTML
+        generar_html(precio_cobre_ton, precio_aluminio_ton)
+
+    except Exception as e:
+        print(f"Error general en el script: {e}")
 
 if __name__ == "__main__":
     obtener_datos_mercado()
